@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Flynn’s Classification — COA Activity</title>
+<style>
+:root{--bg:#f6f8fa;--card:#fff;--tx:#17212b;--dim:#566676;--ln:#d5dde5;--am:#b86e00;--cy:#0a7f8f;--ok:#1a8a3a;--bad:#c93c3c;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0c1116;--card:#131a22;--tx:#dbe6ef;--dim:#8396a8;--ln:#223040;--am:#ffb454;--cy:#4fd1c5;--ok:#5ee87a;--bad:#ff6b6b}}
+:root[data-theme="dark"]{--bg:#0c1116;--card:#131a22;--tx:#dbe6ef;--dim:#8396a8;--ln:#223040;--am:#ffb454;--cy:#4fd1c5;--ok:#5ee87a;--bad:#ff6b6b}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.55 system-ui,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:20px 16px 50px}
+h1{font-size:26px;margin:0 0 4px}h2{font-size:18px;margin:0 0 10px}
+.k{font:600 12px ui-monospace,Consolas,monospace;color:var(--cy);letter-spacing:.05em}
+.sub{color:var(--dim);margin:0 0 18px}
+.card{background:var(--card);border:1px solid var(--ln);border-radius:8px;padding:18px;margin-bottom:18px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:640px){.two{grid-template-columns:1fr}}
+.big{border:1px solid var(--ln);border-radius:6px;padding:12px}
+.am{color:var(--am);font-weight:700}.cy{color:var(--cy);font-weight:700}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+button{font:inherit;cursor:pointer;border:1px solid var(--ln);background:var(--card);color:var(--tx);border-radius:6px;padding:9px 16px}
+button:hover{border-color:var(--cy)}
+.tabs button{font-weight:700;font-family:ui-monospace,Consolas,monospace}
+.tabs button.on{border-color:var(--cy);color:var(--cy);box-shadow:inset 0 -3px 0 var(--cy)}
+button:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+svg{width:100%;height:auto;display:block;border:1px solid var(--ln);border-radius:6px}
+svg text{fill:var(--tx);font:600 15px system-ui,sans-serif}
+.box{fill:var(--card);stroke:var(--ln);stroke-width:2}
+.cu{stroke:var(--am)}.pu{stroke:var(--cy)}
+.wi{stroke:var(--am);stroke-width:2.5;fill:none}.wd{stroke:var(--cy);stroke-width:2.5;fill:none}
+.di{fill:var(--am)}.dd{fill:var(--cy)}
+.leg{display:flex;gap:18px;flex-wrap:wrap;margin:10px 0;font-size:14px;align-items:center}
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}
+.stat{flex:1;min-width:150px;border:1px solid var(--ln);border-radius:6px;padding:10px 12px}
+.stat b{display:block;font-size:22px}
+.kid{border-left:4px solid var(--cy);padding:6px 12px;margin:12px 0;font-size:17px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px;border-bottom:1px solid var(--ln);text-align:left;vertical-align:top}
+th{color:var(--dim);font-size:12px;text-transform:uppercase}
+.q button{display:block;width:100%;text-align:left;margin:6px 0}
+.fb{margin-top:10px;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="k">COMPUTER ORGANIZATION &amp; ARCHITECTURE · ACTIVITY 7</div>
+  <h1>Flynn’s Classification of Computer Architectures</h1>
+  <p class="sub">Computers are sorted by how many <b>instruction streams</b> and <b>data streams</b> they handle at once.</p>
+
+  <div class="card">
+    <h2>The two ingredients</h2>
+    <div class="two">
+      <div class="big"><span class="am">Instruction stream (IS)</span><br>What to <b>do</b>: the recipe or the to-do list.</div>
+      <div class="big"><span class="cy">Data stream (DS)</span><br>What to do it <b>to</b>: the ingredients or the numbers.</div>
+    </div>
+    <p style="margin:12px 0 0">One or many instructions × one or many data = four classes: <b>SISD, SIMD, MISD, MIMD</b>.</p>
+  </div>
+
+  <div class="card">
+    <h2>Architecture diagrams <span style="font-weight:400;color:var(--dim)">(select a class)</span></h2>
+    <div class="tabs" id="tabs"></div>
+    <div id="title" style="font-weight:700;font-size:18px"></div>
+    <svg id="svg" viewBox="0 0 640 300" role="img" aria-label="Architecture diagram"></svg>
+    <div class="leg">
+      <span><span class="am">●</span> Instruction flow (IM → CU → PU)</span>
+      <span><span class="cy">●</span> Data flow (Data memory → PU)</span>
+      <button id="pp">⏸ Pause</button>
+    </div>
+    <div class="stats">
+      <div class="stat">Instruction streams<b id="sI"></b></div>
+      <div class="stat">Data streams<b id="sD"></b></div>
+    </div>
+    <div class="kid" id="kid"></div>
+    <p><b>Real-world example:</b> <span id="ex"></span></p>
+    <p><b>Why this classification:</b> <span id="why"></span></p>
+    <p style="color:var(--dim);font-size:13px;margin:0">IM = Instruction Memory · CU = Control Unit · PU = Processing Unit</p>
+  </div>
+
+  <div class="card">
+    <h2>Comparison</h2>
+    <div style="overflow-x:auto"><table id="tbl"></table></div>
+  </div>
+
+  <div class="card q">
+    <h2>Classify it! <span id="score" style="font-weight:400;color:var(--dim)"></span></h2>
+    <div id="qbox"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var T={
+SISD:{full:'Single Instruction, Single Data',is:'1',ds:'1',c:{cu:1,pu:1,ds:1},
+ ex:'Early single-core PCs, simple microcontrollers, basic calculators.',
+ why:'One control unit issues one instruction at a time, and it works on one data item at a time.',
+ kid:'One cook, one recipe, one potato. Chop… chop… chop.'},
+SIMD:{full:'Single Instruction, Multiple Data',is:'1',ds:'Many',c:{cu:1,pu:4,ds:4},
+ ex:'GPUs, vector instructions (Intel AVX, ARM NEON), brightness filters on photos.',
+ why:'One instruction (e.g. “add 20 to brightness”) is broadcast to many processing units, and each works on a different pixel.',
+ kid:'The teacher says “CLAP!” once, and all four kids clap together, each with their own hands.'},
+MISD:{full:'Multiple Instruction, Single Data',is:'Many',ds:'1',c:{cu:4,pu:4,ds:1},
+ ex:'Fault-tolerant flight computers (a commonly cited textbook example). Very rare in real life.',
+ why:'Several different instruction streams work on the same data stream, and the results are compared to catch errors.',
+ kid:'Four doctors check the same teddy bear. One listens, one looks, one measures.'},
+MIMD:{full:'Multiple Instruction, Multiple Data',is:'Many',ds:'Many',c:{cu:4,pu:4,ds:4},
+ ex:'Multi-core phones and laptops, servers, supercomputers, cloud clusters.',
+ why:'Every processor has its own control unit, so each runs its own program on its own data.',
+ kid:'Four kids each play their own game with their own toys. Nobody waits and nobody copies.'}
+};
+var tabs=document.getElementById('tabs'),svg=document.getElementById('svg'),paused=false;
+
+function ys(n){return n===1?[150]:[45,115,185,255];}
+function wire(x1,y1,x2,y2,cls,dcls,delay){
+  var d='M'+x1+' '+y1+' L'+x2+' '+y2;
+  return '<path class="'+cls+'" d="'+d+'"/><circle class="'+dcls+'" r="5"><animateMotion dur="1.8s" begin="'+delay+'s" repeatCount="indefinite" path="'+d+'"/></circle>';
+}
+function box(x,y,w,h,cls,t){return '<rect class="box '+cls+'" x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="6"/><text x="'+(x+w/2)+'" y="'+(y+h/2+5)+'" text-anchor="middle">'+t+'</text>';}
+
+function draw(c){
+  var cu=ys(c.cu),pu=ys(c.pu),s='',b='',j;
+  for(j=0;j<c.cu;j++) s+=wire(100,cu[j],180,cu[j],'wi','di',j*0.3);
+  for(j=0;j<c.pu;j++){
+    var ci=c.cu===1?0:j;
+    s+=wire(270,cu[ci],370,pu[j],'wi','di',0.6+j*0.3);
+    s+=wire(540,(c.ds===1&&c.pu>1)?150:pu[j],460,pu[j],'wd','dd',j*0.3);
+  }
+  b+=box(10,20,90,260,'','Instruction<tspan x="55" dy="18">Memory</tspan>');
+  b+=box(540,20,90,260,'','Data<tspan x="585" dy="18">Memory</tspan>');
+  for(j=0;j<c.cu;j++) b+=box(180,cu[j]-22,90,44,'cu','CU'+(c.cu>1?j+1:''));
+  for(j=0;j<c.pu;j++) b+=box(370,pu[j]-22,90,44,'pu','PU'+(c.pu>1?j+1:''));
+  svg.innerHTML=s+b;
+  svg.unpauseAnimations&&(paused?svg.pauseAnimations():svg.unpauseAnimations());
+}
+
+function show(k){
+  var t=T[k];
+  Array.prototype.forEach.call(tabs.children,function(b){b.className=b.textContent===k?'on':'';});
+  document.getElementById('title').textContent=k+' — '+t.full;
+  document.getElementById('sI').textContent=t.is;
+  document.getElementById('sD').textContent=t.ds;
+  document.getElementById('kid').textContent='Toddler version: '+t.kid;
+  document.getElementById('ex').textContent=t.ex;
+  document.getElementById('why').textContent=t.why;
+  draw(t.c);
+}
+Object.keys(T).forEach(function(k){
+  var b=document.createElement('button');b.textContent=k;
+  b.addEventListener('click',function(){show(k);});tabs.appendChild(b);
+});
+document.getElementById('pp').addEventListener('click',function(){
+  paused=!paused;this.textContent=paused?'▶ Play':'⏸ Pause';
+  paused?svg.pauseAnimations():svg.unpauseAnimations();
+});
+
+var tb='<tr><th>Class</th><th>Instruction streams</th><th>Data streams</th><th>Example</th></tr>';
+Object.keys(T).forEach(function(k){tb+='<tr><td><b>'+k+'</b></td><td>'+T[k].is+'</td><td>'+T[k].ds+'</td><td>'+T[k].ex+'</td></tr>';});
+document.getElementById('tbl').innerHTML=tb;
+
+var Q=[
+['An old single-core PC runs one program, one instruction after another, on one value at a time.','SISD','One instruction stream, one data stream.'],
+['A GPU makes every pixel of a photo 20% brighter using the same instruction.','SIMD','One instruction is applied to many pixels (many data).'],
+['A phone plays music, loads maps and sends messages at once on separate cores.','MIMD','Different programs (instructions) on different data, all at the same time.'],
+['Redundant flight computers use different checking methods on the same sensor reading.','MISD','Different instruction streams work on one shared data stream.'],
+['One ARM NEON instruction adds four pairs of numbers together.','SIMD','A single instruction operates on multiple data items.']
+],qi=0,score=0,qbox=document.getElementById('qbox'),sc=document.getElementById('score');
+function ask(){
+  if(qi>=Q.length){qbox.innerHTML='<p><b>Finished! Score: '+score+' / '+Q.length+'</b></p><button id="again">Try again</button>';
+    document.getElementById('again').onclick=function(){qi=0;score=0;ask();};sc.textContent='';return;}
+  sc.textContent='(Question '+(qi+1)+' of '+Q.length+')';
+  var h='<p>'+Q[qi][0]+'</p>';
+  Object.keys(T).forEach(function(k){h+='<button data-k="'+k+'">'+k+' — '+T[k].full+'</button>';});
+  h+='<div class="fb" id="fb"></div>';qbox.innerHTML=h;
+  Array.prototype.forEach.call(qbox.querySelectorAll('button[data-k]'),function(b){
+    b.onclick=function(){
+      var ok=b.dataset.k===Q[qi][1];if(ok)score++;
+      var f=document.getElementById('fb');
+      f.style.color=ok?'var(--ok)':'var(--bad)';
+      f.innerHTML=(ok?'Correct! ':'Not quite. Answer: '+Q[qi][1]+'. ')+Q[qi][2]+'<br><button id="nx" style="margin-top:8px;width:auto">Next →</button>';
+      Array.prototype.forEach.call(qbox.querySelectorAll('button[data-k]'),function(x){x.disabled=true;});
+      document.getElementById('nx').onclick=function(){qi++;ask();};
+    };
+  });
+}
+show('SISD');ask();
+})();
+</script>
+</body>
+</html>
